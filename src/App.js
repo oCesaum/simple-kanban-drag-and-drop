@@ -6,14 +6,17 @@ export default function App() {
     {
       status: "todo",
       content: "Fazer Vídeos",
+      color: "#EE4444",
     },
     {
       status: "in-progress",
       content: "Fazer Códigos",
+      color: "#EAB308",
     },
     {
       status: "done",
       content: "Fazer Comida",
+      color: "#22C55E",
     },
   ]);
 
@@ -169,7 +172,7 @@ export default function App() {
                       key={task.content}
                     >
                       <div className="relative flex justify-between items-center">
-                        <div className="w-8 h-2 mb-4 rounded-lg bg-red-500"></div>
+                        <div className="w-8 h-2 mb-4 rounded-lg bg-[#EE4444]"></div>
                         <button
                           className="absolute -right-4 -top-3 w-8 h-7 mb-4 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
                           onClick={() => handleEditTask(task)}
