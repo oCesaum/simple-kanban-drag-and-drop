@@ -23,7 +23,8 @@ export default function App() {
   const [taskBeingEditedIndex, setTaskBeingEditedIndex] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [draggingOver, setDraggingOver] = useState();
-  const [taskBeingDragged, setTaskBeingDragged] = useState();
+  const [taskBeingDragged, setTaskBeingDragged] = useState({});
+  const [taskBeingDraggedCopy, setTaskBeingDraggedCopy] = useState({});
 
   const createTaskModal = useRef(null);
   const editTaskModal = useRef(null);
@@ -37,19 +38,25 @@ export default function App() {
     setDragging(false);
     setDraggingOver("");
     setTaskBeingDragged();
-    console.log("end");
   }
 
-  function dragover(dropzone) {
+  function dragover(e, dropzone) {
+    e.preventDefault();
     setDraggingOver(dropzone);
     if (taskBeingDragged.status !== dropzone) {
-      taskBeingDragged.status = dropzone;
-      // setTasks([...tasks, newTaskBeingDragged]);
-
-      // const newTaskBeingDragged = {...taskBeingDragged};
-      // newTaskBeingDragged.status = dropzone;
-      // setTasks([...tasks, newTaskBeingDragged]);
+      setTaskBeingDraggedCopy(taskBeingDragged);
+      taskBeingDraggedCopy.status = dropzone;
     }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    console.log('asd')
+    if(taskBeingDraggedCopy.status) {
+      taskBeingDragged.status = taskBeingDraggedCopy.status;
+    } 
+    setTaskBeingDraggedCopy({});
+    dragend(); 
   }
 
   function closeModal() {
@@ -145,7 +152,8 @@ export default function App() {
                   ? "bg-[#FD951F08]"
                   : ""
               }`}
-              onDragOver={() => dragover("todo")}
+              onDragOver={(e) => dragover(e, "todo")}
+              onDrop={(e) => handleDrop(e)}
               onDragLeave={() => setDraggingOver("")}
             >
               {tasks.map(
@@ -212,7 +220,8 @@ export default function App() {
                   ? "bg-[#FD951F08]"
                   : ""
               }`}
-              onDragOver={() => dragover("in-progress")}
+              onDragOver={(e) => dragover(e, "in-progress")}
+              onDrop={(e) => handleDrop(e)}
               onDragLeave={() => setDraggingOver("")}
             >
               {tasks.map(
@@ -279,7 +288,8 @@ export default function App() {
                   ? "bg-[#FD951F08]"
                   : ""
               }`}
-              onDragOver={() => dragover("done")}
+              onDragOver={(e) => dragover(e, "done")}
+              onDrop={(e) => handleDrop(e)}
               onDragLeave={() => setDraggingOver("")}
             >
               {tasks.map(
