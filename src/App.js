@@ -140,13 +140,13 @@ export default function App() {
     }
   }
 
-  function handleeditCard(card, boardName) {
+  function handleEditCard(card, boardName) {
     setNewCardProgressModal(boardName);
     setCardBeingEdited(card);
     editCardModal?.current.showModal();
   }
 
-  function updatecardBeingEdited(newValue) {
+  function updateCardBeingEdited(newValue) {
     setNewCardValue(newValue);
     setCardBeingEdited({
       id: cardBeingEdited.id,
@@ -212,11 +212,12 @@ export default function App() {
                           >
                             <div className="relative flex justify-between items-center">
                               <div
-                                className={`w-8 h-2 mb-4 rounded-lg bg-[${board.color}]`}
+                                style={{backgroundColor: board.color}}
+                                className={`w-8 h-2 mb-4 rounded-lg`}
                               ></div>
                               <button
                                 className="absolute -right-4 -top-3 w-8 h-7 mb-4 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
-                                onClick={() => handleeditCard(card, board.name)}
+                                onClick={() => handleEditCard(card, board.name)}
                                 title="Edit this card"
                               >
                                 <svg
@@ -259,13 +260,7 @@ export default function App() {
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
-                className={`w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] ${
-                  newCardProgressModal === "todo"
-                    ? "hover:text-red-500"
-                    : newCardProgressModal === "in-progress"
-                    ? "hover:text-yellow-500"
-                    : "hover:text-green-500"
-                }`}
+                className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
               >
                 x
               </button>
@@ -344,13 +339,7 @@ export default function App() {
                 <button
                   onClick={() => closeModal()}
                   title="Close modal"
-                  className={`w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] ${
-                    newCardProgressModal === "todo"
-                      ? "hover:text-red-500"
-                      : newCardProgressModal === "in-progress"
-                      ? "hover:text-yellow-500"
-                      : "hover:text-green-500"
-                  }`}
+                  className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   x
                 </button>
@@ -359,13 +348,8 @@ export default function App() {
             <div className="transition-colors p-4 min-w-[282px]">
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
-                  className={`w-8 h-2 mb-4 rounded-lg ${
-                    newCardProgressModal === "todo"
-                      ? "bg-red-500"
-                      : newCardProgressModal === "in-progress"
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
-                  }`}
+                  style={{backgroundColor: boards.find(board => board.cards.includes(cardBeingEdited))?.color}}
+                  className="w-8 h-2 mb-4 rounded-lg"
                 ></div>
                 <label name="editCard" className="text-white">
                   <input
@@ -375,7 +359,7 @@ export default function App() {
                     autoFocus
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
                     value={cardBeingEdited?.content}
-                    onChange={(e) => updatecardBeingEdited(e.target.value)}
+                    onChange={(e) => updateCardBeingEdited(e.target.value)}
                     onKeyDown={(e) =>
                       pressEnterInInput(e, newCardProgressModal, "editCard")
                     }
