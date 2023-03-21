@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import uuid from 'react-uuid';
+import uuid from "react-uuid";
 
 import "./App.css";
 
@@ -9,7 +9,7 @@ export default function App() {
       id: 1,
       name: "todo",
       color: "#EE4444",
-      tasks: [
+      cards: [
         {
           id: 1,
           content: "Fazer Vídeos",
@@ -20,7 +20,7 @@ export default function App() {
       id: 2,
       name: "in-progress",
       color: "#EAB308",
-      tasks: [
+      cards: [
         {
           id: 2,
           content: "Fazer Códigos",
@@ -31,7 +31,7 @@ export default function App() {
       id: 3,
       name: "done",
       color: "#22C55E",
-      tasks: [
+      cards: [
         {
           id: 3,
           content: "Fazer Comida",
@@ -40,121 +40,127 @@ export default function App() {
     },
   ]);
 
-  const [newTaskProgressModal, setNewTaskProgressModal] = useState("");
-  const [newTaskValue, setNewTaskValue] = useState("");
-  const [taskBeingEdited, setTaskBeingEdited] = useState({});
-  // const [taskBeingEditedIndex, setTaskBeingEditedIndex] = useState(null);
+  const [newCardProgressModal, setNewCardProgressModal] = useState("");
+  const [newCardValue, setNewCardValue] = useState("");
+  const [cardBeingEdited, setCardBeingEdited] = useState({});
   const [dragging, setDragging] = useState(false);
   const [draggingOver, setDraggingOver] = useState();
-  const [taskBeingDragged, setTaskBeingDragged] = useState({});
-  const [taskBeingDraggedCopy, setTaskBeingDraggedCopy] = useState({});
+  const [cardBeingDragged, setCardBeingDragged] = useState({});
+  const [cardBeingDraggedCopy, setCardBeingDraggedCopy] = useState({});
 
-  const createTaskModal = useRef(null);
-  const editTaskModal = useRef(null);
+  const createCardModal = useRef(null);
+  const editCardModal = useRef(null);
 
-  function dragstart(task) {
+  function dragstart(card) {
     setDragging(true);
-    setTaskBeingDragged(task);
+    setCardBeingDragged(card);
   }
 
   function dragend() {
     setDragging(false);
     setDraggingOver("");
-    setTaskBeingDragged();
+    setCardBeingDragged();
   }
 
   function dragover(e, dropzone) {
     e.preventDefault();
     setDraggingOver(dropzone);
-    if (taskBeingDragged.status !== dropzone) {
-      setTaskBeingDraggedCopy(taskBeingDragged);
-      taskBeingDraggedCopy.status = dropzone;
+    if (cardBeingDragged.status !== dropzone) {
+      setCardBeingDraggedCopy(cardBeingDragged);
+      cardBeingDraggedCopy.status = dropzone;
     }
   }
 
   function handleDrop(e) {
     e.preventDefault();
     console.log("asd");
-    if (taskBeingDraggedCopy.status) {
-      taskBeingDragged.status = taskBeingDraggedCopy.status;
+    if (cardBeingDraggedCopy.status) {
+      cardBeingDragged.status = cardBeingDraggedCopy.status;
     }
-    setTaskBeingDraggedCopy({});
+    setCardBeingDraggedCopy({});
     dragend();
   }
 
   function closeModal() {
-    setNewTaskProgressModal("");
-    setNewTaskValue("");
-    setTaskBeingEdited({});
-    createTaskModal?.current.close();
-    editTaskModal?.current.close();
+    setNewCardProgressModal("");
+    setNewCardValue("");
+    setCardBeingEdited({});
+    createCardModal?.current.close();
+    editCardModal?.current.close();
   }
 
-  function handleAddTask(taskProgress) {
-    setNewTaskProgressModal(taskProgress);
-    createTaskModal?.current.showModal();
+  function handleAddCard(cardProgress) {
+    setNewCardProgressModal(cardProgress);
+    createCardModal?.current.showModal();
   }
 
-  function pressEnterInInput(e, newTaskProgressModal, saveDirection) {
+  function pressEnterInInput(e, newCardProgressModal, saveDirection) {
     if (e.key === "Enter") {
-      handleSave(newTaskProgressModal, saveDirection);
+      handleSave(newCardProgressModal, saveDirection);
     }
     if (e.key === "Escape") {
       closeModal();
     }
   }
 
-  function handleSave(newTaskProgressModal, saveDirection) {
-    if (!newTaskValue) {
-      alert("Please write a task");
+  function handleSave(newCardProgressModal, saveDirection) {
+    if (!newCardValue) {
+      alert("Please write a card");
       return;
     }
-    if (saveDirection === "saveNewTask") {
+    if (saveDirection === "saveNewCard") {
       if (
         boards.find((board) =>
-          board.tasks.find((task) => task.content === newTaskValue)
+          board.cards.find((card) => card.content === newCardValue)
         )
       ) {
-        alert("This task already exists, please create a different task");
+        alert("This card already exists, please create a different card");
       } else {
         const updatedBoards = structuredClone(boards);
-        updatedBoards[updatedBoards.findIndex(board => board.name === newTaskProgressModal)].tasks.push(
-          {
-            id: uuid(),
-            content: newTaskValue,
-          }
-        )
+        updatedBoards[
+          updatedBoards.findIndex(
+            (board) => board.name === newCardProgressModal
+          )
+        ].cards.push({
+          id: uuid(),
+          content: newCardValue,
+        });
         setBoards(updatedBoards);
         closeModal();
       }
     }
-    if (saveDirection === "editTask") {
+    if (saveDirection === "editCard") {
       const editedBoards = structuredClone(boards);
-      editedBoards[editedBoards.findIndex(board => board.name === newTaskProgressModal)].tasks.find(task => task.id === taskBeingEdited.id).content = taskBeingEdited.content
-      setBoards(editedBoards)
+      editedBoards[
+        editedBoards.findIndex((board) => board.name === newCardProgressModal)
+      ].cards.find((card) => card.id === cardBeingEdited.id).content =
+        cardBeingEdited.content;
+      setBoards(editedBoards);
       closeModal();
     }
   }
 
-  function handleEditTask(task, boardName) {
-    setNewTaskProgressModal(boardName);
-    setTaskBeingEdited(task);
-    editTaskModal?.current.showModal();
+  function handleeditCard(card, boardName) {
+    setNewCardProgressModal(boardName);
+    setCardBeingEdited(card);
+    editCardModal?.current.showModal();
   }
 
-  function updateTaskBeingEdited(newValue) {
-    setNewTaskValue(newValue)
-    setTaskBeingEdited(
-      {
-        id: taskBeingEdited.id,
-        content: newValue,
-      },
-    );
+  function updatecardBeingEdited(newValue) {
+    setNewCardValue(newValue);
+    setCardBeingEdited({
+      id: cardBeingEdited.id,
+      content: newValue,
+    });
   }
 
-  function handleRemoveTask() {
+  function handleRemoveCard() {
     const updateBoards = structuredClone(boards);
-    updateBoards[updateBoards.findIndex(board => board.name === newTaskProgressModal)].tasks = updateBoards[updateBoards.findIndex(board => board.name === newTaskProgressModal)].tasks.filter(task => task.id !== taskBeingEdited.id)
+    updateBoards[
+      updateBoards.findIndex((board) => board.name === newCardProgressModal)
+    ].cards = updateBoards[
+      updateBoards.findIndex((board) => board.name === newCardProgressModal)
+    ].cards.filter((card) => card.id !== cardBeingEdited.id);
     setBoards(updateBoards);
     closeModal();
   }
@@ -173,8 +179,8 @@ export default function App() {
                   <div className="flex justify-between items-center text-[#FD951FCC]">
                     <h3 className="p-4 m-0">{board.name}</h3>
                     <button
-                      onClick={() => handleAddTask(board.name)}
-                      title="Add a new task"
+                      onClick={() => handleAddCard(board.name)}
+                      title="Add a new card"
                       className={`w-8 h-8 mx-2 text-xl hover:brightness-75 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]`}
                     >
                       +
@@ -192,17 +198,17 @@ export default function App() {
                     onDrop={(e) => handleDrop(e)}
                     onDragLeave={() => setDraggingOver("")}
                   >
-                    {board.tasks.map(
-                      (task) =>
-                        task && (
+                    {board.cards.map(
+                      (card) =>
+                        card && (
                           <div
                             className={`card bg-[#1A1A1C] mb-7 rounded-md font-semibold text-lg w-64 p-4 shadow-custom  ${
-                              taskBeingDragged === task ? "opacity-50" : ""
+                              cardBeingDragged === card ? "opacity-50" : ""
                             }`}
                             draggable="true"
-                            onDragStart={() => dragstart(task)}
+                            onDragStart={() => dragstart(card)}
                             onDragEnd={() => dragend()}
-                            key={task.id}
+                            key={card.id}
                           >
                             <div className="relative flex justify-between items-center">
                               <div
@@ -210,8 +216,8 @@ export default function App() {
                               ></div>
                               <button
                                 className="absolute -right-4 -top-3 w-8 h-7 mb-4 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
-                                onClick={() => handleEditTask(task, board.name)}
-                                title="Edit this task"
+                                onClick={() => handleeditCard(card, board.name)}
+                                title="Edit this card"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -233,7 +239,7 @@ export default function App() {
                                 </svg>
                               </button>
                             </div>
-                            <div className="content">{task.content}</div>
+                            <div className="content">{card.content}</div>
                           </div>
                         )
                     )}
@@ -243,20 +249,20 @@ export default function App() {
           )}
         </div>
         <dialog
-          ref={createTaskModal}
+          ref={createCardModal}
           onClose={() => closeModal()}
           className="backdrop:bg-black/60 bg-transparent relative rounded-lg overflow-hidden"
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">new {newTaskProgressModal} task</h3>
+              <h3 className="p-4 m-0">new {newCardProgressModal} card</h3>
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
                 className={`w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] ${
-                  newTaskProgressModal === "todo"
+                  newCardProgressModal === "todo"
                     ? "hover:text-red-500"
-                    : newTaskProgressModal === "in-progress"
+                    : newCardProgressModal === "in-progress"
                     ? "hover:text-yellow-500"
                     : "hover:text-green-500"
                 }`}
@@ -268,25 +274,25 @@ export default function App() {
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
                   className={`w-8 h-2 mb-4 rounded-lg ${
-                    newTaskProgressModal === "todo"
+                    newCardProgressModal === "todo"
                       ? "bg-red-500"
-                      : newTaskProgressModal === "in-progress"
+                      : newCardProgressModal === "in-progress"
                       ? "bg-yellow-500"
                       : "bg-green-500"
                   }`}
                 ></div>
-                <label name="newTask" className="text-white">
+                <label name="newCard" className="text-white">
                   <input
                     type="text"
-                    name="newTask"
-                    id="newTask"
+                    name="newCard"
+                    id="newCard"
                     autoFocus
-                    placeholder="Add a new task"
+                    placeholder="Add a new card"
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
-                    value={newTaskValue}
-                    onChange={(e) => setNewTaskValue(e.target.value)}
+                    value={newCardValue}
+                    onChange={(e) => setNewCardValue(e.target.value)}
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newTaskProgressModal, "saveNewTask")
+                      pressEnterInInput(e, newCardProgressModal, "saveNewCard")
                     }
                   />
                 </label>
@@ -300,9 +306,9 @@ export default function App() {
                   cancel
                 </button>
                 <button
-                  title="Save new task"
+                  title="Save new card"
                   onClick={() =>
-                    handleSave(newTaskProgressModal, "saveNewTask")
+                    handleSave(newCardProgressModal, "saveNewCard")
                   }
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
@@ -313,18 +319,18 @@ export default function App() {
           </div>
         </dialog>
         <dialog
-          ref={editTaskModal}
+          ref={editCardModal}
           onClose={() => closeModal()}
           className="backdrop:bg-black/60 bg-transparent relative rounded-lg overflow-hidden"
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">Edit {newTaskProgressModal} task</h3>
+              <h3 className="p-4 m-0">Edit {newCardProgressModal} card</h3>
               <div className="flex items-center">
                 <button
-                  title="Delete task"
+                  title="Delete card"
                   className="w-6 h-6 focus-visible:outline focus-visible:outline-[#FD951FCC] flex justify-center items-center"
-                  onClick={() => handleRemoveTask()}
+                  onClick={() => handleRemoveCard()}
                 >
                   <svg
                     className="w-4 h-4 hover:fill-red-500 cursor-pointer"
@@ -339,9 +345,9 @@ export default function App() {
                   onClick={() => closeModal()}
                   title="Close modal"
                   className={`w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] ${
-                    newTaskProgressModal === "todo"
+                    newCardProgressModal === "todo"
                       ? "hover:text-red-500"
-                      : newTaskProgressModal === "in-progress"
+                      : newCardProgressModal === "in-progress"
                       ? "hover:text-yellow-500"
                       : "hover:text-green-500"
                   }`}
@@ -354,24 +360,24 @@ export default function App() {
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
                   className={`w-8 h-2 mb-4 rounded-lg ${
-                    newTaskProgressModal === "todo"
+                    newCardProgressModal === "todo"
                       ? "bg-red-500"
-                      : newTaskProgressModal === "in-progress"
+                      : newCardProgressModal === "in-progress"
                       ? "bg-yellow-500"
                       : "bg-green-500"
                   }`}
                 ></div>
-                <label name="editTask" className="text-white">
+                <label name="editCard" className="text-white">
                   <input
                     type="text"
-                    name="editTask"
-                    id="editTask"
+                    name="editCard"
+                    id="editCard"
                     autoFocus
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
-                    value={taskBeingEdited?.content}
-                    onChange={(e) => updateTaskBeingEdited(e.target.value)}
+                    value={cardBeingEdited?.content}
+                    onChange={(e) => updatecardBeingEdited(e.target.value)}
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newTaskProgressModal, "editTask")
+                      pressEnterInInput(e, newCardProgressModal, "editCard")
                     }
                   />
                 </label>
@@ -386,7 +392,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save edits"
-                  onClick={() => handleSave(newTaskProgressModal, "editTask")}
+                  onClick={() => handleSave(newCardProgressModal, "editCard")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
