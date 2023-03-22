@@ -42,7 +42,9 @@ export default function App() {
 
   const [newCardProgressModal, setNewCardProgressModal] = useState("");
   const [newCardValue, setNewCardValue] = useState("");
+  const [newBoardValue, setNewBoardValue] = useState("");
   const [cardBeingEdited, setCardBeingEdited] = useState({});
+  const [boardBeingEdited, setBoardBeingEdited] = useState({});
   const [dragging, setDragging] = useState(false);
   const [draggingOver, setDraggingOver] = useState();
   const [cardBeingDragged, setCardBeingDragged] = useState({});
@@ -50,6 +52,7 @@ export default function App() {
 
   const createCardModal = useRef(null);
   const editCardModal = useRef(null);
+  const editBoardModal = useRef(null);
 
   function dragstart(card) {
     setDragging(true);
@@ -86,7 +89,6 @@ export default function App() {
 
   function handleDrop(e) {
     e.preventDefault();
-    console.log("asd");
     if (cardBeingDraggedCopy.status) {
       cardBeingDragged.status = cardBeingDraggedCopy.status;
     }
@@ -100,6 +102,7 @@ export default function App() {
     setCardBeingEdited({});
     createCardModal?.current.close();
     editCardModal?.current.close();
+    editBoardModal?.current.close();
   }
 
   function handleAddCard(cardProgress) {
@@ -117,40 +120,42 @@ export default function App() {
   }
 
   function handleSave(newCardProgressModal, saveDirection) {
-    if (!newCardValue) {
-      alert("Please write a card");
-      return;
-    }
-    if (saveDirection === "saveNewCard") {
-      if (
-        boards.find((board) =>
-          board.cards.find((card) => card.content === newCardValue)
-        )
-      ) {
-        alert("This card already exists, please create a different card");
-      } else {
-        const updatedBoards = structuredClone(boards);
-        updatedBoards[
-          updatedBoards.findIndex(
-            (board) => board.name === newCardProgressModal
-          )
-        ].cards.push({
-          id: uuid(),
-          content: newCardValue,
-        });
-        setBoards(updatedBoards);
-        closeModal();
-      }
-    }
-    if (saveDirection === "editCard") {
-      const editedBoards = structuredClone(boards);
-      editedBoards[
-        editedBoards.findIndex((board) => board.name === newCardProgressModal)
-      ].cards.find((card) => card.id === cardBeingEdited.id).content =
-        cardBeingEdited.content;
-      setBoards(editedBoards);
-      closeModal();
-    }
+    console.log(newCardProgressModal)
+    console.log(saveDirection)
+    // if (!newCardValue) {
+    //   alert("Please write a card");
+    //   return;
+    // }
+    // if (saveDirection === "saveNewCard") {
+    //   if (
+    //     boards.find((board) =>
+    //       board.cards.find((card) => card.content === newCardValue)
+    //     )
+    //   ) {
+    //     alert("This card already exists, please create a different card");
+    //   } else {
+    //     const updatedBoards = structuredClone(boards);
+    //     updatedBoards[
+    //       updatedBoards.findIndex(
+    //         (board) => board.name === newCardProgressModal
+    //       )
+    //     ].cards.push({
+    //       id: uuid(),
+    //       content: newCardValue,
+    //     });
+    //     setBoards(updatedBoards);
+    //     closeModal();
+    //   }
+    // }
+    // if (saveDirection === "editCard") {
+    //   const editedBoards = structuredClone(boards);
+    //   editedBoards[
+    //     editedBoards.findIndex((board) => board.name === newCardProgressModal)
+    //   ].cards.find((card) => card.id === cardBeingEdited.id).content =
+    //     cardBeingEdited.content;
+    //   setBoards(editedBoards);
+    //   closeModal();
+    // }
   }
 
   function handleEditCard(card, boardName) {
@@ -159,11 +164,26 @@ export default function App() {
     editCardModal?.current.showModal();
   }
 
+  function handleEditBoard(board) {
+    setBoardBeingEdited(board);
+    editBoardModal?.current.showModal();
+  }
+
   function updateCardBeingEdited(newValue) {
     setNewCardValue(newValue);
     setCardBeingEdited({
       id: cardBeingEdited.id,
       content: newValue,
+    });
+  }
+
+  function updateBoardBeingEdited(newValue) {
+    setNewBoardValue(newValue);
+    setBoardBeingEdited({
+      id: boardBeingEdited.id,
+      name: newValue,
+      color: boardBeingEdited.color,
+      cards: boardBeingEdited.cards
     });
   }
 
@@ -178,21 +198,16 @@ export default function App() {
     closeModal();
   }
 
+  function handleRemoveBoard() {
+
+  }
+
   return (
     <div className="App min-h-screen bg-[#130F0D] flex flex-col">
       <header className="flex justify-between items-center text-white py-5 px-10 font-bold uppercase border-b border-[#FD951F11]">
-        <a
-          href="https://github.com/oCesaum/simple-kanban-drag-and-drop"
-          target={"_blank"}
-          rel="noreferrer"
-        >
-          <h1
-            className="text-2xl hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600"
-            title="Click to go to GitHub project"
-          >
-            Simple Kamban <span className="text-sm">Drag and Drop</span>
-          </h1>
-        </a>
+        <h1 className="text-2xl hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200">
+          Simple Kamban <span className="text-sm">Drag and Drop</span>
+        </h1>
       </header>
       <main className="text-white py-8 px-10 flex-grow">
         <div className="boards flex justify-center flex-wrap gap-5">
@@ -205,13 +220,39 @@ export default function App() {
                 >
                   <div className="flex justify-between items-center text-[#FD951FCC]">
                     <h3 className="p-4 m-0">{board.name}</h3>
-                    <button
-                      onClick={() => handleAddCard(board.name)}
-                      title="Add a new card"
-                      className={`w-8 h-8 mx-2 text-xl hover:brightness-75 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]`}
-                    >
-                      +
-                    </button>
+                    <div className="flex mr-2">
+                      <button
+                        onClick={() => handleAddCard(board.name)}
+                        title="Add a new card"
+                        className={`w-6 h-8 text-xl hover:brightness-75 transition-all duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]`}
+                      >
+                        +
+                      </button>
+                      <button
+                        className="w-6 h-8 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                        onClick={() => handleEditBoard(board)}
+                        title="Edit this card"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="#FD951FCC"
+                          version="1.1"
+                          id="Capa_1"
+                          width="18px"
+                          height="18px"
+                          viewBox="0 0 41.915 41.916"
+                          className="hover:brightness-50 transition-all duration-200"
+                        >
+                          <g>
+                            <g>
+                              <path d="M11.214,20.956c0,3.091-2.509,5.589-5.607,5.589C2.51,26.544,0,24.046,0,20.956c0-3.082,2.511-5.585,5.607-5.585    C8.705,15.371,11.214,17.874,11.214,20.956z" />
+                              <path d="M26.564,20.956c0,3.091-2.509,5.589-5.606,5.589c-3.097,0-5.607-2.498-5.607-5.589c0-3.082,2.511-5.585,5.607-5.585    C24.056,15.371,26.564,17.874,26.564,20.956z" />
+                              <path d="M41.915,20.956c0,3.091-2.509,5.589-5.607,5.589c-3.097,0-5.606-2.498-5.606-5.589c0-3.082,2.511-5.585,5.606-5.585    C39.406,15.371,41.915,17.874,41.915,20.956z" />
+                            </g>
+                          </g>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div
                     className={`dropzone transition-colors p-4 min-w-[282px] min-h-[144px] ${
@@ -243,7 +284,7 @@ export default function App() {
                                 className={`w-8 h-2 mb-4 rounded-lg`}
                               ></div>
                               <button
-                                className="absolute -right-4 -top-3 w-8 h-7 mb-4 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                                className="absolute -right-4 -top-3 w-8 h-8 mb-4 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
                                 onClick={() => handleEditCard(card, board.name)}
                                 title="Edit this card"
                               >
@@ -255,7 +296,7 @@ export default function App() {
                                   width="18px"
                                   height="18px"
                                   viewBox="0 0 41.915 41.916"
-                                  className="hover:brightness-50"
+                                  className="hover:brightness-50 transition-all duration-200"
                                 >
                                   <g>
                                     <g>
@@ -287,7 +328,7 @@ export default function App() {
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
-                className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] hover:text-red-500 transition-colors duration-200"
               >
                 x
               </button>
@@ -323,7 +364,7 @@ export default function App() {
                 <button
                   onClick={() => closeModal()}
                   title="Cancel edits"
-                  className="px-5 rounded-full bg-red-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  className="px-5 rounded-full bg-red-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   cancel
                 </button>
@@ -332,7 +373,7 @@ export default function App() {
                   onClick={() =>
                     handleSave(newCardProgressModal, "saveNewCard")
                   }
-                  className="px-5 rounded-full bg-green-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
                 </button>
@@ -355,7 +396,7 @@ export default function App() {
                   onClick={() => handleRemoveCard()}
                 >
                   <svg
-                    className="w-4 h-4 hover:fill-red-500 cursor-pointer"
+                    className="w-4 h-4 hover:fill-red-500 transition-colors duration-200 cursor-pointer"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 448 512"
                     fill="#FD951FCC"
@@ -366,7 +407,7 @@ export default function App() {
                 <button
                   onClick={() => closeModal()}
                   title="Close modal"
-                  className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] hover:text-red-500 transition-colors duration-200"
                 >
                   x
                 </button>
@@ -377,7 +418,7 @@ export default function App() {
                 <div
                   style={{
                     backgroundColor: boards.find((board) =>
-                      board.cards.includes(cardBeingEdited)
+                      board.cards.find(card => card.id === cardBeingEdited.id)
                     )?.color,
                   }}
                   className="w-8 h-2 mb-4 rounded-lg"
@@ -401,14 +442,92 @@ export default function App() {
                 <button
                   onClick={() => closeModal()}
                   title="Cancel edits"
-                  className="px-5 rounded-full bg-red-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  className="px-5 rounded-full bg-red-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   cancel
                 </button>
                 <button
                   title="Save edits"
                   onClick={() => handleSave(newCardProgressModal, "editCard")}
-                  className="px-5 rounded-full bg-green-500 hover:brightness-75 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                >
+                  save
+                </button>
+              </div>
+            </div>
+          </div>
+        </dialog>
+        <dialog
+          ref={editBoardModal}
+          onClose={() => closeModal()}
+          className="backdrop:bg-black/60 bg-transparent relative rounded-lg overflow-hidden"
+        >
+          <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
+            <div className="flex justify-between items-center text-[#FD951FCC]">
+              <h3 className="p-4 m-0">Edit {boards.find((board) =>
+                    board.id === boardBeingEdited.id
+                  )?.name} board</h3>
+              <div className="flex items-center">
+                <button
+                  title="Delete board"
+                  className="w-6 h-6 focus-visible:outline focus-visible:outline-[#FD951FCC] flex justify-center items-center"
+                  onClick={() => handleRemoveBoard()}
+                >
+                  <svg
+                    className="w-4 h-4 hover:fill-red-500 transition-colors duration-200 cursor-pointer"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 448 512"
+                    fill="#FD951FCC"
+                  >
+                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => closeModal()}
+                  title="Close modal"
+                  className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] hover:text-red-500 transition-colors duration-200"
+                >
+                  x
+                </button>
+              </div>
+            </div>
+            <div className="transition-colors p-4 min-w-[282px]">
+              <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
+                <div
+                  style={{
+                    backgroundColor: boards.find((board) =>
+                    board.id === boardBeingEdited.id
+                  )?.color,
+                  }}
+                  className="w-8 h-2 mb-4 rounded-lg"
+                ></div>
+                <label name="editBoardName" className="text-white">
+                  <input
+                    type="text"
+                    name="editBoardName"
+                    id="editBoardName"
+                    autoFocus
+                    className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
+                    value={boardBeingEdited?.name}
+                    onChange={(e) => updateBoardBeingEdited(e.target.value, "boardName")}
+                    onKeyDown={(e) =>
+                      pressEnterInInput(e, newBoardValue, "editBoardName")
+                    }
+                  />
+                </label>
+              </div>
+              <div className="flex justify-between mt-8">
+                <button
+                  onClick={() => closeModal()}
+                  title="Cancel edits"
+                  className="px-5 rounded-full bg-red-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                >
+                  cancel
+                </button>
+                <button
+                  title="Save edits"
+                  onClick={() => handleSave(newBoardValue, "editCard")}
+                  className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
                 </button>
@@ -418,16 +537,34 @@ export default function App() {
         </dialog>
       </main>
       <footer className="text-white py-3 sm:py-5 px-0 sm:px-10 font-bold uppercase border-t border-[#FD951F11] flex justify-between items-center flex-wrap">
-        <p className="text-[10px] hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 mx-auto sm:mx-0">
-        &copy; Copyright 2023 César Augusto
-        </p>
+        <div className="text-[10px] mx-auto sm:mx-0">
+          <a
+            href="https://codepen.io/maykbrito/details/ZEbNxrZ"
+            className="hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+            target={"_blank"}
+            rel="noreferrer"
+            title="Click to go to GitHub project"
+          >
+            &copy; Copyright 2023 by mayk brito{" "}
+          </a>
+          |{" "}
+          <a
+            href="https://github.com/oCesaum/simple-kanban-drag-and-drop"
+            target={"_blank"}
+            rel="noreferrer"
+            className="hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
+            title="project repository"
+          >
+            modifications by César Augusto
+          </a>
+        </div>
         <ul className="w-fit flex gap-4 text-sm mx-auto sm:mx-0">
           <li>
             <a
               href="https://github.com/oCesaum"
               target={"_blank"}
               rel="noreferrer"
-              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 group"
+              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] group"
             >
               <svg
                 className="w-7 h-7 fill-white group-hover:fill-[url(#gradiente)]"
@@ -454,7 +591,7 @@ export default function App() {
               href="https://www.linkedin.com/in/cesar-augsuto/"
               target={"_blank"}
               rel="noreferrer"
-              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 group"
+              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] group"
             >
               <svg
                 className="w-7 h-7 fill-white group-hover:fill-[url(#gradiente)]"
@@ -481,7 +618,7 @@ export default function App() {
               href="https://www.instagram.com/_cesaum/"
               target={"_blank"}
               rel="noreferrer"
-              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 group"
+              className="flex items-center gap-2 hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] group"
             >
               <svg
                 className="w-7 h-7 fill-white group-hover:fill-[url(#gradiente)]"
