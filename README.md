@@ -6,4 +6,5 @@ Page: https://simple-kanban-drag-and-drop.vercel.app/
     - [x] make array of tasks, new array must contain columns with column name, color, id and an object with the respective column tasks
   - [ ] enable change columns name
   - [ ] enable task color change  
-  - [ ] on handle move task, add the task to exactily position of array
+  - [ ] fix drag and drop
+    - [ ] on handle move task, add the task to exactily position of array
