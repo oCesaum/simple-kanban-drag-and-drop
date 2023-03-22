@@ -180,7 +180,7 @@ export default function App() {
 
   return (
     <div className="App min-h-screen bg-[#130F0D]">
-      <header className="flex justify-between items-center text-white py-5 px-10 font-bold uppercase">
+      <header className="flex justify-between items-center text-white py-5 px-10 font-bold uppercase border-b border-[#FD951F11]">
         <a
           href="https://github.com/oCesaum/simple-kanban-drag-and-drop"
           target={"_blank"}
