@@ -40,7 +40,7 @@ export default function App() {
     },
   ]);
 
-  const [newBoardName, setNewBoardName] = useState("");
+  const [newBoardValue, setNewBoardValue] = useState({});
   const [newCardValue, setNewCardValue] = useState("");
   const [cardBeingEdited, setCardBeingEdited] = useState({});
   const [boardBeingEdited, setBoardBeingEdited] = useState({});
@@ -96,7 +96,7 @@ export default function App() {
   }
 
   function closeModal() {
-    setNewBoardName("");
+    setNewBoardValue("");
     setNewCardValue("");
     setCardBeingEdited({});
     createCardModal?.current.close();
@@ -105,21 +105,21 @@ export default function App() {
   }
 
   function handleAddCard(cardProgress) {
-    setNewBoardName(cardProgress);
+    setNewBoardValue(cardProgress);
     createCardModal?.current.showModal();
   }
 
-  function pressEnterInInput(e, newBoardName, saveDirection) {
+  function pressEnterInInput(e, newBoardValue, saveDirection) {
     if (e.key === "Enter") {
-      handleSave(newBoardName, saveDirection);
+      handleSave(newBoardValue, saveDirection);
     }
     if (e.key === "Escape") {
       closeModal();
     }
   }
 
-  function handleSave(newBoardName, saveDirection) {
-    if (!newBoardName) {
+  function handleSave(newBoardValue, saveDirection) {
+    if (!newBoardValue) {
       alert("Please write a text");
       return;
     }
@@ -133,7 +133,7 @@ export default function App() {
       } else {
         const updatedBoards = structuredClone(boards);
         updatedBoards[
-          updatedBoards.findIndex((board) => board.name === newBoardName)
+          updatedBoards.findIndex((board) => board.name === newBoardValue)
         ].cards.push({
           id: uuid(),
           content: newCardValue,
@@ -144,23 +144,27 @@ export default function App() {
     if (saveDirection === "editCard") {
       const editedBoards = structuredClone(boards);
       editedBoards[
-        editedBoards.findIndex((board) => board.name === newBoardName)
+        editedBoards.findIndex((board) => board.name === newBoardValue)
       ].cards.find((card) => card.id === cardBeingEdited.id).content =
         cardBeingEdited.content;
       setBoards(editedBoards);
     }
-    if (saveDirection === "editnewBoardName") {
+    if (saveDirection === "newBoardValue") {
       const boardsCopy = structuredClone(boards);
-      boardsCopy[
-        boards.findIndex((board) => board.id === boardBeingEdited.id)
-      ] = boardBeingEdited;
+      const boardBeingEditedIndex = boards.findIndex(
+        (board) => board.id === boardBeingEdited.id
+      );
+      if (boardBeingEdited.color !== boards[boardBeingEditedIndex].color) {
+        boardsCopy[boardBeingEditedIndex].color = boardBeingEdited.color;
+      }
+      boardsCopy[boardBeingEditedIndex] = boardBeingEdited;
       setBoards(boardsCopy);
     }
     closeModal();
   }
 
-  function handleEditCard(card, newBoardName) {
-    setNewBoardName(newBoardName);
+  function handleEditCard(card, newBoardValue) {
+    setNewBoardValue(newBoardValue);
     setCardBeingEdited(card);
     editCardModal?.current.showModal();
   }
@@ -170,7 +174,7 @@ export default function App() {
     editBoardModal?.current.showModal();
   }
 
-  function updateCardBeingEdited(newValue) {
+  function handkeUpdateCardBeingEdited(newValue) {
     setNewCardValue(newValue);
     setCardBeingEdited({
       id: cardBeingEdited.id,
@@ -178,8 +182,8 @@ export default function App() {
     });
   }
 
-  function updateBoardBeingEdited(newValue) {
-    setNewBoardName(newValue);
+  function handleUpdateBoardBeingEdited(newValue) {
+    setNewBoardValue(newValue);
     setBoardBeingEdited({
       id: boardBeingEdited.id,
       name: newValue,
@@ -191,9 +195,9 @@ export default function App() {
   function handleRemoveCard() {
     const updateBoards = structuredClone(boards);
     updateBoards[
-      updateBoards.findIndex((board) => board.name === newBoardName)
+      updateBoards.findIndex((board) => board.name === newBoardValue)
     ].cards = updateBoards[
-      updateBoards.findIndex((board) => board.name === newBoardName)
+      updateBoards.findIndex((board) => board.name === newBoardValue)
     ].cards.filter((card) => card.id !== cardBeingEdited.id);
     setBoards(updateBoards);
     closeModal();
@@ -201,7 +205,7 @@ export default function App() {
 
   function handleRemoveBoard() {
     const boardsCopy = structuredClone(boards);
-    setBoards(boardsCopy.filter(board => board.id !== boardBeingEdited.id));
+    setBoards(boardsCopy.filter((board) => board.id !== boardBeingEdited.id));
   }
   return (
     <div className="App min-h-screen bg-[#130F0D] flex flex-col">
@@ -325,7 +329,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">new {newBoardName} card</h3>
+              <h3 className="p-4 m-0">new {newBoardValue} card</h3>
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
@@ -338,9 +342,9 @@ export default function App() {
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
                   className={`w-8 h-2 mb-4 rounded-lg ${
-                    newBoardName === "todo"
+                    newBoardValue === "todo"
                       ? "bg-red-500"
-                      : newBoardName === "in-progress"
+                      : newBoardValue === "in-progress"
                       ? "bg-yellow-500"
                       : "bg-green-500"
                   }`}
@@ -356,7 +360,7 @@ export default function App() {
                     value={newCardValue}
                     onChange={(e) => setNewCardValue(e.target.value)}
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newBoardName, "saveNewCard")
+                      pressEnterInInput(e, newBoardValue, "saveNewCard")
                     }
                   />
                 </label>
@@ -371,7 +375,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save new card"
-                  onClick={() => handleSave(newBoardName, "saveNewCard")}
+                  onClick={() => handleSave(newBoardValue, "saveNewCard")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
@@ -387,7 +391,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">Edit {newBoardName} card</h3>
+              <h3 className="p-4 m-0">Edit {newBoardValue} card</h3>
               <div className="flex items-center">
                 <button
                   title="Delete card"
@@ -430,9 +434,11 @@ export default function App() {
                     autoFocus
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
                     value={cardBeingEdited?.content}
-                    onChange={(e) => updateCardBeingEdited(e.target.value)}
+                    onChange={(e) =>
+                      handkeUpdateCardBeingEdited(e.target.value)
+                    }
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newBoardName, "editCard")
+                      pressEnterInInput(e, newBoardValue, "editCard")
                     }
                   />
                 </label>
@@ -447,7 +453,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save edits"
-                  onClick={() => handleSave(newBoardName, "editCard")}
+                  onClick={() => handleSave(newBoardValue, "editCard")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
@@ -502,19 +508,22 @@ export default function App() {
                   }}
                   className="w-8 h-2 mb-4 rounded-lg"
                 ></div>
-                <label name="editnewBoardName" className="text-white">
+                <label name="editBoardName" className="text-white">
                   <input
                     type="text"
-                    name="editnewBoardName"
-                    id="editnewBoardName"
+                    name="editBoardName"
+                    id="editBoardName"
                     autoFocus
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
                     value={boardBeingEdited?.name}
                     onChange={(e) =>
-                      updateBoardBeingEdited(e.target.value, "newBoardName")
+                      handleUpdateBoardBeingEdited(
+                        e.target.value,
+                        "newBoardValue"
+                      )
                     }
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newBoardName, "editnewBoardName")
+                      pressEnterInInput(e, newBoardValue, "editBoardName")
                     }
                   />
                 </label>
@@ -529,7 +538,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save edits"
-                  onClick={() => handleSave(newBoardName, "editnewBoardName")}
+                  onClick={() => handleSave(newBoardValue, "newBoardValue")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
