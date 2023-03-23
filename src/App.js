@@ -40,9 +40,8 @@ export default function App() {
     },
   ]);
 
-  const [newCardProgressModal, setNewCardProgressModal] = useState("");
+  const [newBoardName, setNewBoardName] = useState("");
   const [newCardValue, setNewCardValue] = useState("");
-  const [newBoardValue, setNewBoardValue] = useState("");
   const [cardBeingEdited, setCardBeingEdited] = useState({});
   const [boardBeingEdited, setBoardBeingEdited] = useState({});
   const [dragging, setDragging] = useState(false);
@@ -97,7 +96,7 @@ export default function App() {
   }
 
   function closeModal() {
-    setNewCardProgressModal("");
+    setNewBoardName("");
     setNewCardValue("");
     setCardBeingEdited({});
     createCardModal?.current.close();
@@ -106,60 +105,62 @@ export default function App() {
   }
 
   function handleAddCard(cardProgress) {
-    setNewCardProgressModal(cardProgress);
+    setNewBoardName(cardProgress);
     createCardModal?.current.showModal();
   }
 
-  function pressEnterInInput(e, newCardProgressModal, saveDirection) {
+  function pressEnterInInput(e, newBoardName, saveDirection) {
     if (e.key === "Enter") {
-      handleSave(newCardProgressModal, saveDirection);
+      handleSave(newBoardName, saveDirection);
     }
     if (e.key === "Escape") {
       closeModal();
     }
   }
 
-  function handleSave(newCardProgressModal, saveDirection) {
-    console.log(newCardProgressModal)
-    console.log(saveDirection)
-    // if (!newCardValue) {
-    //   alert("Please write a card");
-    //   return;
-    // }
-    // if (saveDirection === "saveNewCard") {
-    //   if (
-    //     boards.find((board) =>
-    //       board.cards.find((card) => card.content === newCardValue)
-    //     )
-    //   ) {
-    //     alert("This card already exists, please create a different card");
-    //   } else {
-    //     const updatedBoards = structuredClone(boards);
-    //     updatedBoards[
-    //       updatedBoards.findIndex(
-    //         (board) => board.name === newCardProgressModal
-    //       )
-    //     ].cards.push({
-    //       id: uuid(),
-    //       content: newCardValue,
-    //     });
-    //     setBoards(updatedBoards);
-    //     closeModal();
-    //   }
-    // }
-    // if (saveDirection === "editCard") {
-    //   const editedBoards = structuredClone(boards);
-    //   editedBoards[
-    //     editedBoards.findIndex((board) => board.name === newCardProgressModal)
-    //   ].cards.find((card) => card.id === cardBeingEdited.id).content =
-    //     cardBeingEdited.content;
-    //   setBoards(editedBoards);
-    //   closeModal();
-    // }
+  function handleSave(newBoardName, saveDirection) {
+    if (!newBoardName) {
+      alert("Please write a text");
+      return;
+    }
+    if (saveDirection === "saveNewCard") {
+      if (
+        boards.find((board) =>
+          board.cards.find((card) => card.content === newCardValue)
+        )
+      ) {
+        alert("This card already exists, please create a different card");
+      } else {
+        const updatedBoards = structuredClone(boards);
+        updatedBoards[
+          updatedBoards.findIndex((board) => board.name === newBoardName)
+        ].cards.push({
+          id: uuid(),
+          content: newCardValue,
+        });
+        setBoards(updatedBoards);
+      }
+    }
+    if (saveDirection === "editCard") {
+      const editedBoards = structuredClone(boards);
+      editedBoards[
+        editedBoards.findIndex((board) => board.name === newBoardName)
+      ].cards.find((card) => card.id === cardBeingEdited.id).content =
+        cardBeingEdited.content;
+      setBoards(editedBoards);
+    }
+    if (saveDirection === "editnewBoardName") {
+      const boardsCopy = structuredClone(boards);
+      boardsCopy[
+        boards.findIndex((board) => board.id === boardBeingEdited.id)
+      ] = boardBeingEdited;
+      setBoards(boardsCopy);
+    }
+    closeModal();
   }
 
-  function handleEditCard(card, boardName) {
-    setNewCardProgressModal(boardName);
+  function handleEditCard(card, newBoardName) {
+    setNewBoardName(newBoardName);
     setCardBeingEdited(card);
     editCardModal?.current.showModal();
   }
@@ -178,30 +179,30 @@ export default function App() {
   }
 
   function updateBoardBeingEdited(newValue) {
-    setNewBoardValue(newValue);
+    setNewBoardName(newValue);
     setBoardBeingEdited({
       id: boardBeingEdited.id,
       name: newValue,
       color: boardBeingEdited.color,
-      cards: boardBeingEdited.cards
+      cards: boardBeingEdited.cards,
     });
   }
 
   function handleRemoveCard() {
     const updateBoards = structuredClone(boards);
     updateBoards[
-      updateBoards.findIndex((board) => board.name === newCardProgressModal)
+      updateBoards.findIndex((board) => board.name === newBoardName)
     ].cards = updateBoards[
-      updateBoards.findIndex((board) => board.name === newCardProgressModal)
+      updateBoards.findIndex((board) => board.name === newBoardName)
     ].cards.filter((card) => card.id !== cardBeingEdited.id);
     setBoards(updateBoards);
     closeModal();
   }
 
   function handleRemoveBoard() {
-
+    const boardsCopy = structuredClone(boards);
+    setBoards(boardsCopy.filter(board => board.id !== boardBeingEdited.id));
   }
-
   return (
     <div className="App min-h-screen bg-[#130F0D] flex flex-col">
       <header className="flex justify-between items-center text-white py-5 px-10 font-bold uppercase border-b border-[#FD951F11]">
@@ -231,7 +232,7 @@ export default function App() {
                       <button
                         className="w-6 h-8 flex justify-center items-center rotate-90 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
                         onClick={() => handleEditBoard(board)}
-                        title="Edit this card"
+                        title="Edit this board"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +325,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">new {newCardProgressModal} card</h3>
+              <h3 className="p-4 m-0">new {newBoardName} card</h3>
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
@@ -337,9 +338,9 @@ export default function App() {
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
                   className={`w-8 h-2 mb-4 rounded-lg ${
-                    newCardProgressModal === "todo"
+                    newBoardName === "todo"
                       ? "bg-red-500"
-                      : newCardProgressModal === "in-progress"
+                      : newBoardName === "in-progress"
                       ? "bg-yellow-500"
                       : "bg-green-500"
                   }`}
@@ -355,7 +356,7 @@ export default function App() {
                     value={newCardValue}
                     onChange={(e) => setNewCardValue(e.target.value)}
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newCardProgressModal, "saveNewCard")
+                      pressEnterInInput(e, newBoardName, "saveNewCard")
                     }
                   />
                 </label>
@@ -370,9 +371,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save new card"
-                  onClick={() =>
-                    handleSave(newCardProgressModal, "saveNewCard")
-                  }
+                  onClick={() => handleSave(newBoardName, "saveNewCard")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
@@ -388,7 +387,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">Edit {newCardProgressModal} card</h3>
+              <h3 className="p-4 m-0">Edit {newBoardName} card</h3>
               <div className="flex items-center">
                 <button
                   title="Delete card"
@@ -418,7 +417,7 @@ export default function App() {
                 <div
                   style={{
                     backgroundColor: boards.find((board) =>
-                      board.cards.find(card => card.id === cardBeingEdited.id)
+                      board.cards.find((card) => card.id === cardBeingEdited.id)
                     )?.color,
                   }}
                   className="w-8 h-2 mb-4 rounded-lg"
@@ -433,7 +432,7 @@ export default function App() {
                     value={cardBeingEdited?.content}
                     onChange={(e) => updateCardBeingEdited(e.target.value)}
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newCardProgressModal, "editCard")
+                      pressEnterInInput(e, newBoardName, "editCard")
                     }
                   />
                 </label>
@@ -448,7 +447,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save edits"
-                  onClick={() => handleSave(newCardProgressModal, "editCard")}
+                  onClick={() => handleSave(newBoardName, "editCard")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
@@ -464,9 +463,11 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">Edit {boards.find((board) =>
-                    board.id === boardBeingEdited.id
-                  )?.name} board</h3>
+              <h3 className="p-4 m-0">
+                Edit{" "}
+                {boards.find((board) => board.id === boardBeingEdited.id)?.name}{" "}
+                board
+              </h3>
               <div className="flex items-center">
                 <button
                   title="Delete board"
@@ -495,23 +496,25 @@ export default function App() {
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
                   style={{
-                    backgroundColor: boards.find((board) =>
-                    board.id === boardBeingEdited.id
-                  )?.color,
+                    backgroundColor: boards.find(
+                      (board) => board.id === boardBeingEdited.id
+                    )?.color,
                   }}
                   className="w-8 h-2 mb-4 rounded-lg"
                 ></div>
-                <label name="editBoardName" className="text-white">
+                <label name="editnewBoardName" className="text-white">
                   <input
                     type="text"
-                    name="editBoardName"
-                    id="editBoardName"
+                    name="editnewBoardName"
+                    id="editnewBoardName"
                     autoFocus
                     className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
                     value={boardBeingEdited?.name}
-                    onChange={(e) => updateBoardBeingEdited(e.target.value, "boardName")}
+                    onChange={(e) =>
+                      updateBoardBeingEdited(e.target.value, "newBoardName")
+                    }
                     onKeyDown={(e) =>
-                      pressEnterInInput(e, newBoardValue, "editBoardName")
+                      pressEnterInInput(e, newBoardName, "editnewBoardName")
                     }
                   />
                 </label>
@@ -526,7 +529,7 @@ export default function App() {
                 </button>
                 <button
                   title="Save edits"
-                  onClick={() => handleSave(newBoardValue, "editCard")}
+                  onClick={() => handleSave(newBoardName, "editnewBoardName")}
                   className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
                 >
                   save
