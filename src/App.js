@@ -40,7 +40,7 @@ export default function App() {
     },
   ]);
 
-  const [newBoardValue, setNewBoardValue] = useState({});
+  const [newBoardValue, setNewBoardValue] = useState();
   const [newCardValue, setNewCardValue] = useState("");
   const [cardBeingEdited, setCardBeingEdited] = useState({});
   const [boardBeingEdited, setBoardBeingEdited] = useState({});
@@ -224,7 +224,7 @@ export default function App() {
                   key={board.id}
                 >
                   <div className="flex justify-between items-center text-[#FD951FCC]">
-                    <h3 className="p-4 m-0">{board.name}</h3>
+                    <h2 className="p-4 m-0">{board.name}</h2>
                     <div className="flex mr-2">
                       <button
                         onClick={() => handleAddCard(board.name)}
@@ -329,7 +329,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">new {newBoardValue} card</h3>
+              <h2 className="p-4 m-0">new {newBoardValue} card</h2>
               <button
                 onClick={() => closeModal()}
                 title="Close modal"
@@ -341,13 +341,12 @@ export default function App() {
             <div className="transition-colors p-4 min-w-[282px]">
               <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
                 <div
-                  className={`w-8 h-2 mb-4 rounded-lg ${
-                    newBoardValue === "todo"
-                      ? "bg-red-500"
-                      : newBoardValue === "in-progress"
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
-                  }`}
+                  style={{
+                    backgroundColor: boards.find((board) =>
+                      board.cards.find((card) => card.id === cardBeingEdited.id)
+                    )?.color
+                  }}
+                  className="w-8 h-2 mb-4 rounded-lg"
                 ></div>
                 <label name="newCard" className="text-white">
                   <input
@@ -391,7 +390,7 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">Edit {newBoardValue} card</h3>
+              <h2 className="p-4 m-0">Edit {newBoardValue} card</h2>
               <div className="flex items-center">
                 <button
                   title="Delete card"
@@ -469,11 +468,11 @@ export default function App() {
         >
           <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
             <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h3 className="p-4 m-0">
+              <h2 className="p-4 m-0">
                 Edit{" "}
                 {boards.find((board) => board.id === boardBeingEdited.id)?.name}{" "}
                 board
-              </h3>
+              </h2>
               <div className="flex items-center">
                 <button
                   title="Delete board"
