@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import uuid from "react-uuid";
+import { ChromePicker } from "react-color";
 
 import "./App.css";
 
@@ -52,6 +53,8 @@ export default function App() {
   const createCardModal = useRef(null);
   const editCardModal = useRef(null);
   const editBoardModal = useRef(null);
+
+  const [currentColor, setCurrentColor] = useState("#fff");
 
   function dragstart(card) {
     setDragging(true);
@@ -119,7 +122,7 @@ export default function App() {
   }
 
   function handleSave(newBoardValue, saveDirection) {
-    if (!newBoardValue) {
+    if (!newBoardValue && boardBeingEdited.color === currentColor) {
       alert("Please write a text");
       return;
     }
@@ -154,8 +157,8 @@ export default function App() {
       const boardBeingEditedIndex = boards.findIndex(
         (board) => board.id === boardBeingEdited.id
       );
-      if (boardBeingEdited.color !== boards[boardBeingEditedIndex].color) {
-        boardsCopy[boardBeingEditedIndex].color = boardBeingEdited.color;
+      if (boardBeingEdited.color !== currentColor) {
+        boardBeingEdited.color = currentColor;
       }
       boardsCopy[boardBeingEditedIndex] = boardBeingEdited;
       setBoards(boardsCopy);
@@ -171,7 +174,13 @@ export default function App() {
 
   function handleEditBoard(board) {
     setBoardBeingEdited(board);
+    setCurrentColor(board.color);
     editBoardModal?.current.showModal();
+  }
+
+  function handleEditBoardColor() {
+    console.log(boardBeingEdited.color)
+    console.log(currentColor)
   }
 
   function handkeUpdateCardBeingEdited(newValue) {
@@ -215,12 +224,12 @@ export default function App() {
         </h1>
       </header>
       <main className="text-white py-8 px-10 flex-grow">
-        <div className="boards flex justify-center flex-wrap gap-5">
+        <div className="boards flex flex-wrap gap-5">
           {boards.map(
             (board) =>
               board && (
                 <div
-                  className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md"
+                  className="board h-fit max-w-[288px] bg-[#141316] border border-[#FD951F11] rounded-md"
                   key={board.id}
                 >
                   <div className="flex justify-between items-center text-[#FD951FCC]">
@@ -466,89 +475,96 @@ export default function App() {
           onClose={() => closeModal()}
           className="backdrop:bg-black/60 bg-transparent relative rounded-lg overflow-hidden"
         >
-          <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
-            <div className="flex justify-between items-center text-[#FD951FCC]">
-              <h2 className="p-4 m-0">
-                Edit{" "}
-                {boards.find((board) => board.id === boardBeingEdited.id)?.name}{" "}
-                board
-              </h2>
-              <div className="flex items-center">
-                <button
-                  title="Delete board"
-                  className="w-6 h-6 focus-visible:outline focus-visible:outline-[#FD951FCC] flex justify-center items-center"
-                  onClick={() => handleRemoveBoard()}
-                >
-                  <svg
-                    className="w-4 h-4 hover:fill-red-500 transition-colors duration-200 cursor-pointer"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 448 512"
-                    fill="#FD951FCC"
+          <div className="flex gap-5">
+            <div className="board h-fit bg-[#141316] border border-[#FD951F11] rounded-md">
+              <div className="flex justify-between items-center text-[#FD951FCC]">
+                <h2 className="p-4 m-0">
+                  Edit{" "}
+                  {boards.find((board) => board.id === boardBeingEdited.id)?.name}{" "}
+                  board
+                </h2>
+                <div className="flex items-center">
+                  <button
+                    title="Delete board"
+                    className="w-6 h-6 focus-visible:outline focus-visible:outline-[#FD951FCC] flex justify-center items-center"
+                    onClick={() => handleRemoveBoard()}
                   >
-                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => closeModal()}
-                  title="Close modal"
-                  className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] hover:text-red-500 transition-colors duration-200"
-                >
-                  x
-                </button>
+                    <svg
+                      className="w-4 h-4 hover:fill-red-500 transition-colors duration-200 cursor-pointer"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 448 512"
+                      fill="#FD951FCC"
+                    >
+                      <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => closeModal()}
+                    title="Close modal"
+                    className="w-6 h-6 mx-2 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC] hover:text-red-500 transition-colors duration-200"
+                  >
+                    x
+                  </button>
+                </div>
+              </div>
+              <div className="transition-colors p-4 min-w-[282px]">
+                <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
+                  <div
+                    style={{
+                      backgroundColor: currentColor,
+                    }}
+                    className="w-8 h-2 mb-4 rounded-lg"
+                    onClick={() => handleEditBoardColor()}
+                  ></div>
+                  <label name="editBoardName" className="text-white">
+                    <input
+                      type="text"
+                      name="editBoardName"
+                      id="editBoardName"
+                      autoFocus
+                      className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
+                      value={boardBeingEdited?.name}
+                      onChange={(e) =>
+                        handleUpdateBoardBeingEdited(
+                          e.target.value,
+                          "newBoardValue"
+                        )
+                      }
+                      onKeyDown={(e) =>
+                        pressEnterInInput(e, newBoardValue, "editBoardName")
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="flex justify-between mt-8">
+                  <button
+                    onClick={() => closeModal()}
+                    title="Cancel edits"
+                    className="px-5 rounded-full bg-red-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  >
+                    cancel
+                  </button>
+                  <button
+                    title="Save edits"
+                    onClick={() => handleSave(newBoardValue, "newBoardValue")}
+                    className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
+                  >
+                    save
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="transition-colors p-4 min-w-[282px]">
-              <div className="bg-[#1A1A1C] rounded-md font-semibold text-lg w-64 p-4 shadow-custom">
-                <div
-                  style={{
-                    backgroundColor: boards.find(
-                      (board) => board.id === boardBeingEdited.id
-                    )?.color,
-                  }}
-                  className="w-8 h-2 mb-4 rounded-lg"
-                ></div>
-                <label name="editBoardName" className="text-white">
-                  <input
-                    type="text"
-                    name="editBoardName"
-                    id="editBoardName"
-                    autoFocus
-                    className="font-[Nunito] text-white bg-[#1A1A1C] outline-none"
-                    value={boardBeingEdited?.name}
-                    onChange={(e) =>
-                      handleUpdateBoardBeingEdited(
-                        e.target.value,
-                        "newBoardValue"
-                      )
-                    }
-                    onKeyDown={(e) =>
-                      pressEnterInInput(e, newBoardValue, "editBoardName")
-                    }
-                  />
-                </label>
-              </div>
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={() => closeModal()}
-                  title="Cancel edits"
-                  className="px-5 rounded-full bg-red-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
-                >
-                  cancel
-                </button>
-                <button
-                  title="Save edits"
-                  onClick={() => handleSave(newBoardValue, "newBoardValue")}
-                  className="px-5 rounded-full bg-green-500 hover:brightness-75 transition-all duration-200 focus-visible:outline focus-visible:outline-[#FD951FCC]"
-                >
-                  save
-                </button>
-              </div>
-            </div>
+            <ChromePicker
+              color={currentColor}
+              disableAlpha
+              onChange={(color) => setCurrentColor(color.hex)}
+              className="color-picker bg-[#141316] rounded-md"
+            />
           </div>
         </dialog>
       </main>
-      <footer className="text-white py-3 sm:py-5 px-0 sm:px-10 font-bold uppercase border-t border-[#FD951F11] flex justify-between items-center flex-wrap">
-        <div className="text-[10px] mx-auto sm:mx-0">
+      <footer className="text-white py-3 sm:py-5 px-0 sm:px-10 font-bold uppercase border-t border-[#FD951F11] flex justify-center md:justify-between items-center flex-wrap">
+        <div className="text-[10px] mx-auto lg:mx-0">
           <a
             href="https://codepen.io/maykbrito/details/ZEbNxrZ"
             className="hover:text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-600 transition-colors duration-200 rounded-md focus-visible:outline focus-visible:outline-[#FD951FCC]"
@@ -569,7 +585,7 @@ export default function App() {
             modifications by César Augusto
           </a>
         </div>
-        <ul className="w-fit flex gap-4 text-sm mx-auto sm:mx-0">
+        <ul className="w-fit flex gap-4 text-sm mx-auto lg:mx-0">
           <li>
             <a
               href="https://github.com/oCesaum"
