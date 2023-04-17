@@ -69,33 +69,39 @@ export default function App() {
   function dragover(e, dropzone) {
     e.preventDefault();
     setDraggingOver(dropzone);
-  }  
+  }
 
   function handleDrop(e, dropzone) {
     e.preventDefault();
-  
-    const sourceBoardIndex = boards.findIndex(board => board.cards.includes(cardBeingDragged));
+
+    const sourceBoardIndex = boards.findIndex((board) =>
+      board.cards.includes(cardBeingDragged)
+    );
     const sourceBoard = boards[sourceBoardIndex];
-    const targetBoardIndex = boards.findIndex(board => board.name === dropzone);
+    const targetBoardIndex = boards.findIndex(
+      (board) => board.name === dropzone
+    );
     const targetBoard = boards[targetBoardIndex];
-  
+
     // Removendo o cartão do quadro de origem
-    sourceBoard.cards = sourceBoard.cards.filter(card => card !== cardBeingDragged);
-  
+    sourceBoard.cards = sourceBoard.cards.filter(
+      (card) => card !== cardBeingDragged
+    );
+
     // Adicionando o cartão ao quadro de destino
     targetBoard.cards.push(cardBeingDragged);
-  
+
     // Atualizando o estado dos quadros
     const updatedBoards = [...boards];
     updatedBoards[sourceBoardIndex] = sourceBoard;
     updatedBoards[targetBoardIndex] = targetBoard;
     setBoards(updatedBoards);
-  
+
     // Limpando o estado de arrastar e soltar
     setCardBeingDragged(null);
     setDraggingOver(null);
     dragend();
-  }  
+  }
 
   function closeModal() {
     setNewBoardValue("");
@@ -126,7 +132,9 @@ export default function App() {
       return;
     }
     const updatedBoards = structuredClone(boards);
-    const targetBoardIndex = updatedBoards.findIndex((board) => board.name === newBoardValue);
+    const targetBoardIndex = updatedBoards.findIndex(
+      (board) => board.name === newBoardValue
+    );
 
     if (saveDirection === "saveNewCard") {
       if (
@@ -144,7 +152,9 @@ export default function App() {
       }
     }
     if (saveDirection === "editCard") {
-      updatedBoards[targetBoardIndex].cards.find((card) => card.id === cardBeingEdited.id).content = cardBeingEdited.content;
+      updatedBoards[targetBoardIndex].cards.find(
+        (card) => card.id === cardBeingEdited.id
+      ).content = cardBeingEdited.content;
       setBoards(updatedBoards);
     }
     if (saveDirection === "newBoardValue") {
@@ -191,7 +201,9 @@ export default function App() {
   }
 
   function handleRemoveCard() {
-    const confirmation = window.confirm("Are you sure you want to delete this card?");
+    const confirmation = window.confirm(
+      "Are you sure you want to delete this card?"
+    );
     const updateBoards = structuredClone(boards);
     if (confirmation) {
       updateBoards[
@@ -205,7 +217,9 @@ export default function App() {
   }
 
   function handleRemoveBoard() {
-    const confirmation = window.confirm("Are you sure you want to delete this board?");
+    const confirmation = window.confirm(
+      "Are you sure you want to delete this board?"
+    );
     if (confirmation) {
       const boardsCopy = structuredClone(boards);
       setBoards(boardsCopy.filter((board) => board.id !== boardBeingEdited.id));
@@ -349,7 +363,7 @@ export default function App() {
                   style={{
                     backgroundColor: boards.find((board) =>
                       board.cards.find((card) => card.id === cardBeingEdited.id)
-                    )?.color
+                    )?.color,
                   }}
                   className="w-8 h-2 mb-4 rounded-lg"
                 ></div>
@@ -476,7 +490,10 @@ export default function App() {
               <div className="flex justify-between items-center text-[#FD951FCC]">
                 <h2 className="p-4 m-0">
                   Edit{" "}
-                  {boards.find((board) => board.id === boardBeingEdited.id)?.name}{" "}
+                  {
+                    boards.find((board) => board.id === boardBeingEdited.id)
+                      ?.name
+                  }{" "}
                   board
                 </h2>
                 <div className="flex items-center">
