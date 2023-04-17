@@ -48,7 +48,6 @@ export default function App() {
   const [dragging, setDragging] = useState(false);
   const [draggingOver, setDraggingOver] = useState();
   const [cardBeingDragged, setCardBeingDragged] = useState({});
-  const [cardBeingDraggedCopy, setCardBeingDraggedCopy] = useState({});
 
   const createCardModal = useRef(null);
   const editCardModal = useRef(null);
@@ -70,33 +69,33 @@ export default function App() {
   function dragover(e, dropzone) {
     e.preventDefault();
     setDraggingOver(dropzone);
-    // const updatedBoards = structuredClone(boards);
-    // if (boards.find((board) => board.cards.find((card) => card === cardBeingDragged))?.name !== dropzone) {
-    //   console.log(boards[boards.findIndex(board => board.name === dropzone)].name)
-    //     updatedBoards[
-    //       boards.findIndex(board => board.name === dropzone)
-    //     ].cards.push({
-    //       id: cardBeingDragged.id,
-    //       content: cardBeingDragged.content,
-    //     });
-    // setBoards(updatedBoards);
-    // setCardBeingDraggedCopy(cardBeingDragged);
-    // cardBeingDraggedCopy.status = dropzone;
-    // }
-    // updatedBoards[
-    //   updatedBoards.findIndex(board => board.name === dropzone)
-    // ].cards.filter(card => card !== cardBeingDragged)
-    // console.log(updatedBoards)
-  }
+  }  
 
-  function handleDrop(e) {
+  function handleDrop(e, dropzone) {
     e.preventDefault();
-    if (cardBeingDraggedCopy.status) {
-      cardBeingDragged.status = cardBeingDraggedCopy.status;
-    }
-    setCardBeingDraggedCopy({});
+  
+    const sourceBoardIndex = boards.findIndex(board => board.cards.includes(cardBeingDragged));
+    const sourceBoard = boards[sourceBoardIndex];
+    const targetBoardIndex = boards.findIndex(board => board.name === dropzone);
+    const targetBoard = boards[targetBoardIndex];
+  
+    // Removendo o cartão do quadro de origem
+    sourceBoard.cards = sourceBoard.cards.filter(card => card !== cardBeingDragged);
+  
+    // Adicionando o cartão ao quadro de destino
+    targetBoard.cards.push(cardBeingDragged);
+  
+    // Atualizando o estado dos quadros
+    const updatedBoards = [...boards];
+    updatedBoards[sourceBoardIndex] = sourceBoard;
+    updatedBoards[targetBoardIndex] = targetBoard;
+    setBoards(updatedBoards);
+  
+    // Limpando o estado de arrastar e soltar
+    setCardBeingDragged(null);
+    setDraggingOver(null);
     dragend();
-  }
+  }  
 
   function closeModal() {
     setNewBoardValue("");
@@ -126,6 +125,9 @@ export default function App() {
       alert("Please write a text");
       return;
     }
+    const updatedBoards = structuredClone(boards);
+    const targetBoardIndex = updatedBoards.findIndex((board) => board.name === newBoardValue);
+
     if (saveDirection === "saveNewCard") {
       if (
         boards.find((board) =>
@@ -134,10 +136,7 @@ export default function App() {
       ) {
         alert("This card already exists, please create a different card");
       } else {
-        const updatedBoards = structuredClone(boards);
-        updatedBoards[
-          updatedBoards.findIndex((board) => board.name === newBoardValue)
-        ].cards.push({
+        updatedBoards[targetBoardIndex].cards.push({
           id: uuid(),
           content: newCardValue,
         });
@@ -145,23 +144,18 @@ export default function App() {
       }
     }
     if (saveDirection === "editCard") {
-      const editedBoards = structuredClone(boards);
-      editedBoards[
-        editedBoards.findIndex((board) => board.name === newBoardValue)
-      ].cards.find((card) => card.id === cardBeingEdited.id).content =
-        cardBeingEdited.content;
-      setBoards(editedBoards);
+      updatedBoards[targetBoardIndex].cards.find((card) => card.id === cardBeingEdited.id).content = cardBeingEdited.content;
+      setBoards(updatedBoards);
     }
     if (saveDirection === "newBoardValue") {
-      const boardsCopy = structuredClone(boards);
       const boardBeingEditedIndex = boards.findIndex(
         (board) => board.id === boardBeingEdited.id
       );
       if (boardBeingEdited.color !== currentColor) {
         boardBeingEdited.color = currentColor;
       }
-      boardsCopy[boardBeingEditedIndex] = boardBeingEdited;
-      setBoards(boardsCopy);
+      updatedBoards[boardBeingEditedIndex] = boardBeingEdited;
+      setBoards(updatedBoards);
     }
     closeModal();
   }
@@ -176,11 +170,6 @@ export default function App() {
     setBoardBeingEdited(board);
     setCurrentColor(board.color);
     editBoardModal?.current.showModal();
-  }
-
-  function handleEditBoardColor() {
-    console.log(boardBeingEdited.color)
-    console.log(currentColor)
   }
 
   function handkeUpdateCardBeingEdited(newValue) {
@@ -202,19 +191,26 @@ export default function App() {
   }
 
   function handleRemoveCard() {
+    const confirmation = window.confirm("Are you sure you want to delete this card?");
     const updateBoards = structuredClone(boards);
-    updateBoards[
-      updateBoards.findIndex((board) => board.name === newBoardValue)
-    ].cards = updateBoards[
-      updateBoards.findIndex((board) => board.name === newBoardValue)
-    ].cards.filter((card) => card.id !== cardBeingEdited.id);
-    setBoards(updateBoards);
-    closeModal();
+    if (confirmation) {
+      updateBoards[
+        updateBoards.findIndex((board) => board.name === newBoardValue)
+      ].cards = updateBoards[
+        updateBoards.findIndex((board) => board.name === newBoardValue)
+      ].cards.filter((card) => card.id !== cardBeingEdited.id);
+      setBoards(updateBoards);
+      closeModal();
+    }
   }
 
   function handleRemoveBoard() {
-    const boardsCopy = structuredClone(boards);
-    setBoards(boardsCopy.filter((board) => board.id !== boardBeingEdited.id));
+    const confirmation = window.confirm("Are you sure you want to delete this board?");
+    if (confirmation) {
+      const boardsCopy = structuredClone(boards);
+      setBoards(boardsCopy.filter((board) => board.id !== boardBeingEdited.id));
+      closeModal();
+    }
   }
   return (
     <div className="App min-h-screen bg-[#130F0D] flex flex-col">
@@ -277,7 +273,7 @@ export default function App() {
                         : ""
                     }`}
                     onDragOver={(e) => dragover(e, board.name)}
-                    onDrop={(e) => handleDrop(e)}
+                    onDrop={(e) => handleDrop(e, board.name)}
                     onDragLeave={() => setDraggingOver("")}
                   >
                     {board.cards.map(
@@ -514,7 +510,6 @@ export default function App() {
                       backgroundColor: currentColor,
                     }}
                     className="w-8 h-2 mb-4 rounded-lg"
-                    onClick={() => handleEditBoardColor()}
                   ></div>
                   <label name="editBoardName" className="text-white">
                     <input
